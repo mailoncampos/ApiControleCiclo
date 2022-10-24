@@ -12,7 +12,7 @@ import com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento.Mo
 @EnableScheduling
 public class ScheduledTasks{
 	
-	@Autowired
+	
 	private MonitoraCicloECicloEtapa monitoraCicloECicloEtapa;
 	
 	@Autowired
@@ -25,8 +25,7 @@ public class ScheduledTasks{
 	@Scheduled(cron = CRON, zone = TIME_ZONE)
 	public void scheduleFutireTask() {
 		
-		monitoraCicloECicloEtapa.verificarIntegridadeDosCiclos();
-		monitoraCicloECicloEtapa.verificarIntegridadeDosCicloEtapas();
+//		monitoraCicloECicloEtapa.verificarIntegridadeDosCicloEtapas();
 //		monitoraCicloECicloEtapa.efetuaAndamentoDoCicloECicloEtapa();
 		
 	}
