@@ -1,19 +1,23 @@
 package com.ApiControleCiclo.schedule;
 
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento.MonitoraCicloECicloEtapa;
+import com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento.AndamentoCicloECicloEtapaImpl;
 
 @Component
 @EnableScheduling
 public class ScheduledTasks{
 	
 	
-	private MonitoraCicloECicloEtapa monitoraCicloECicloEtapa;
+	private AndamentoCicloECicloEtapaImpl andamentoCicloECicloEtapaImpl;
 	
 	@Autowired
 	ApplicationContext applicationContext;
@@ -21,15 +25,45 @@ public class ScheduledTasks{
 //	private final String CRON = "0 0 0 * * *"; // meia noite de todo dia;
 	private final String CRON = "*/20 * * * * *" ;
 	private final String TIME_ZONE = "America/Cuiaba";
+	private Date dataHoraExecutaAndamento = null;
+	private boolean taskAtiva = false;
+	
 	
 	@Scheduled(cron = CRON, zone = TIME_ZONE)
 	public void scheduleFutireTask() {
 		
-//		monitoraCicloECicloEtapa.verificarIntegridadeDosCicloEtapas();
-//		monitoraCicloECicloEtapa.efetuaAndamentoDoCicloECicloEtapa();
+		/*
+		 * criar método que adiciona um ciclo pendente
+		 */
 		
+		if(taskAtiva == false){
+			andamentoCicloECicloEtapaImpl = new AndamentoCicloECicloEtapaImpl(applicationContext);
+			dataHoraExecutaAndamento = andamentoCicloECicloEtapaImpl.monitoraAndamentoDoCiclo();
+			if(dataHoraExecutaAndamento != null) {
+				executaAndamentoDoCiclo(dataHoraExecutaAndamento);
+			}
+		}
 	}
 	
+	private void executaAndamentoDoCiclo(Date dataHoraExecutaAndamento) {
+		if(this.taskAtiva == true) {
+			return;
+		}
+		taskAtiva = true;
+		Timer timer = new Timer();
+	    TimerTask tarefa = new TimerTask() {
+		     @Override
+		     public void run() {		
+		    	taskAtiva = false;
+		    	andamentoCicloECicloEtapaImpl.efetuaAndamentoDoCicloECicloEtapa(dataHoraExecutaAndamento);
+		     }
+		     
+	     };
+	     timer.schedule(tarefa,dataHoraExecutaAndamento); //Troque para PERIODO_TEMPO
+	}
+
+	
+}
 	/*
 	 * #Sobre o STATUS SUSPENSO
 	 * 
@@ -56,11 +90,7 @@ public class ScheduledTasks{
 	 * 
 	 * 		
 	 * 
-	 * 	Verifica se existe  Ciclo e Ciclo etapas SUSPENSO
-	 * 
-	 * 	Verifica se todos os Ciclos e Ciclo etapas com data final anterior a data atual e com status diferente de SUSPENSO e INATIVO estão fechados
-	 * 
-	 * 	Caso exista um Ciclo ou Ciclo Etapa SUSPENSO
+
 	 * 			
 	 * 
 	 * Fazer andamento do Ciclo
@@ -122,4 +152,3 @@ public class ScheduledTasks{
 	 *			//Ignora
 	 * 		
 	 */
-}

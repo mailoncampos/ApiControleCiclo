@@ -11,9 +11,9 @@ import com.ApiControleCiclo.model.CicloEtapa;
 @Repository
 public interface CicloEtapaRepository extends JpaRepository<CicloEtapa, Long>{
 
-	@Query("SELECT ce FROM CicloEtapa ce WHERE (ce.statusCicloEtapa != '%INATIVO%' AND ce.ciclo.idenCiclo = :idenCiclo)")
+	@Query("SELECT ce FROM CicloEtapa ce WHERE (ce.statusCicloEtapa != 'INATIVO' AND ce.ciclo.idenCiclo = :idenCiclo)")
 	List<CicloEtapa> buscarCicloEtapasPorCicloComStatusDiferenteDeInativo(Long idenCiclo);
 	
-	@Query("SELECT ce FROM CicloEtapa ce WHERE (ce.statusCicloEtapa != '%INATIVO%')")
+	@Query("SELECT ce FROM CicloEtapa ce WHERE (ce.statusCicloEtapa != 'INATIVO')")
 	List<CicloEtapa> buscarCicloEtapasComStatusDiferenteDeInativo();
 }

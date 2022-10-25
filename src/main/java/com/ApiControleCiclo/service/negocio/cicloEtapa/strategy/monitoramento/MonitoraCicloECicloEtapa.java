@@ -1,6 +1,13 @@
 package com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +23,9 @@ import com.ApiControleCiclo.service.CicloService;
 
 @Component
 public abstract class MonitoraCicloECicloEtapa {
+	
+	@Autowired
+	ApplicationContext applicationContext;
 
 	@Autowired
 	protected CicloService cicloService;
@@ -30,24 +40,32 @@ public abstract class MonitoraCicloECicloEtapa {
 	protected List<Ciclo> ciclosDiferenteDeInativo = new ArrayList<Ciclo>();
 
 	protected List<CicloEtapa> cicloEtapasDiferenteDeInativo = new ArrayList<CicloEtapa>();
+	
+	protected LocalDateTime dataInicioCiclo;
+	
+	protected LocalDateTime dataFinalCiclo;
 
 	public MonitoraCicloECicloEtapa(ApplicationContext applicationContext) {
 		cicloService = applicationContext.getBean(CicloService.class);
 		cicloEtapaService = applicationContext.getBean(CicloEtapaService.class);
-
+		
+		this.ciclosDiferenteDeInativo.clear();
+		this.cicloEtapasDiferenteDeInativo.clear();
 		this.ciclosDiferenteDeInativo = cicloService.buscarCiclosComStatusDiferenteDeInativo();
 		this.cicloEtapasDiferenteDeInativo = cicloEtapaService.buscarCicloEtapasComStatusDiferenteDeInativo();
 
 		if (this.ciclosDiferenteDeInativo.isEmpty()) {
-			return; // Gerar um log aqui
+			throw new CicloException(new RuntimeException(), "Não existe nenhum ciclo ativo");
+
 		}
 		if (this.cicloEtapasDiferenteDeInativo.isEmpty()) {
-			return; // Gerar um diferente log aqui
+			throw new CicloException(new RuntimeException(), "Não existe nenhum ciclo etapa ativo");
 		}
 
 		this.cicloAtual = informaCicloAtual(this.ciclosDiferenteDeInativo);
 		this.cicloEtapaAtual = informaCicloEtapaAtual(this.cicloEtapasDiferenteDeInativo, this.cicloAtual);
-
+		
+		this.applicationContext = applicationContext;
 	}
 
 	private Ciclo informaCicloAtual(List<Ciclo> ciclosDiferenteDeInativo) {
@@ -137,7 +155,7 @@ public abstract class MonitoraCicloECicloEtapa {
 
 		if (!ciclosEtapaPendentes.isEmpty()) {
 			for (CicloEtapa auxCicloEtapa : ciclosEtapaPendentes) {
-				if (cicloAtual.getIdenCiclo() != auxCicloEtapa.getIdenCicloEtapa()) {
+				if (cicloAtual.getIdenCiclo() != auxCicloEtapa.getCiclo().getIdenCiclo()) {
 					throw new CicloException(new RuntimeException(), "Existe um ciclo PENDENTE para outro ciclo");
 				}
 				if (cicloEtapaAtual == null || cicloEtapaAtual.getIdenCicloEtapa() == null
@@ -153,12 +171,14 @@ public abstract class MonitoraCicloECicloEtapa {
 					"Inconsistecia na tabela ciclo. Existe um ciclo FECHADO posterior ao " + "ciclo aberto "
 							+ cicloAtual.getStatusCiclo().toString() + " para o " + "exercício de "
 							+ cicloAtual.getExercicio().getAnoExercicio().toString());
+		}else if (!ciclosEtapaAbertos.isEmpty()){
+			cicloEtapaAtual = ciclosEtapaAbertos.get(0);
 		}
 		if (!ciclosEtapaFechados.isEmpty()) {
 
 			if (cicloEtapaAtual.getIdenCicloEtapa() == null) {
 				for (CicloEtapa auxCicloEtapa : ciclosEtapaFechados) {
-					if (auxCicloEtapa.getDataHoraFim().after(cicloEtapaAtual.getDataHoraFim())) {
+					if (cicloEtapaAtual.getIdenCicloEtapa() == null || auxCicloEtapa.getDataHoraFim().after(cicloEtapaAtual.getDataHoraFim())) {
 						cicloEtapaAtual = auxCicloEtapa;
 					}
 				}
@@ -167,7 +187,7 @@ public abstract class MonitoraCicloECicloEtapa {
 					if (auxCicloEtapa.getDataHoraFim().after(cicloEtapaAtual.getDataHoraFim())) {
 						throw new CicloException(new RuntimeException(),
 								"Existe um ciclo FECHADO posterior ao " + "ciclo etapa "
-										+ cicloEtapaAtual.getStatusCicloEtapa().toString() + " para o " + "ciclo "
+										+ cicloEtapaAtual.getStatusCicloEtapa().toString() + " para o ciclo "
 										+ cicloAtual.getCiclo().getNomeCiclo());
 					}
 				}
@@ -177,9 +197,22 @@ public abstract class MonitoraCicloECicloEtapa {
 
 		return cicloEtapaAtual;
 	}
-
-	protected void efetuaAndamentoDoCicloECicloEtapa() {
-
+	
+	public Date monitoraCiclo() {
+		
+		LocalDateTime dataAtualInicio = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0));
+		LocalDateTime dataAtualFinal = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59));
+		
+		this.dataInicioCiclo = LocalDateTime.ofInstant(this.cicloAtual.getDataHoraInicio().toInstant(), ZoneId.of("America/Cuiaba"));
+		this.dataFinalCiclo = LocalDateTime.ofInstant(this.cicloAtual.getDataHoraFim().toInstant(), ZoneId.of("America/Cuiaba"));
+		
+		if(dataAtualInicio.isBefore(this.dataInicioCiclo) && dataAtualFinal.isAfter(this.dataInicioCiclo)) {
+			 return Date.from(this.dataInicioCiclo.toInstant(ZoneOffset.ofHours(-4)));
+		}else if(dataAtualInicio.isBefore(this.dataFinalCiclo) && dataAtualFinal.isAfter(this.dataFinalCiclo)) {
+			return Date.from(this.dataFinalCiclo.toInstant(ZoneOffset.ofHours(-4)));
+		}
+		
+		return null;
 	}
 
 }

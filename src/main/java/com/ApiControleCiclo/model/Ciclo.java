@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.ApiControleCiclo.model.enuns.StatusCicloEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name="ciclo", schema = "recadastramento")
@@ -49,9 +50,11 @@ public class Ciclo implements Serializable {
 	@JoinColumn(name = "iden_termo", referencedColumnName = "iden_termo")
 	private Termo termo;
 	
+	@JsonFormat(timezone = "America/Cuiaba")
 	@Column(name = "data_hora_inicio")
 	private Date dataHoraInicio;
 	
+	@JsonFormat(timezone = "America/Cuiaba")
 	@Column(name = "data_hora_fim")
 	private Date dataHoraFim;
 	

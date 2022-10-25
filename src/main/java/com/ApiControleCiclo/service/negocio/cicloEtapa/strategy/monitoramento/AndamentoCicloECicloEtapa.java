@@ -1,10 +1,14 @@
 package com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento;
 
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
-@Component
-public abstract class AndamentoCicloECicloEtapa {
+@Component("AndamentoCicloECicloEtapa")
+public interface AndamentoCicloECicloEtapa{
 	
-	protected abstract void efetuaAndamentoDoCicloECicloEtapa();
+
+	public abstract void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento);
+	
 
 }

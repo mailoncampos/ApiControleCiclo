@@ -11,6 +11,6 @@ import com.ApiControleCiclo.model.Ciclo;
 @Repository
 public interface CicloRepository extends JpaRepository<Ciclo, Long>{
 
-	@Query("SELECT c FROM Ciclo c WHERE c.statusCiclo != '%INATIVO%'")
+	@Query("SELECT c FROM Ciclo c WHERE c.statusCiclo != 'INATIVO'")
 	List<Ciclo> buscarCiclosComStatusDiferenteDeInativo();
 }
