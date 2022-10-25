@@ -15,10 +15,10 @@ public class AndamentoCicloECicloEtapaImpl extends MonitoraCicloECicloEtapa{
 
 	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento) {
 		
-		AndamentoCicloECicloEtapa andamentoCicloECicloEtapa = this.cicloEtapaAtual.getStatusCicloEtapa().contextoCicloEtapa(applicationContext);
+		AndamentoCicloECicloEtapa andamentoCicloECicloEtapa = this.cicloAtual.getStatusCiclo().contextoCicloEtapa(applicationContext);
 		
 			
-		andamentoCicloECicloEtapa.efetuaAndamentoDoCicloECicloEtapa(dataHoraDoAndamento);
+		andamentoCicloECicloEtapa.efetuaAndamentoDoCicloECicloEtapa(dataHoraDoAndamento, this.cicloAtual.getDataHoraInicio(),this.cicloAtual.getDataHoraFim());
 	}
 
 	public Date monitoraAndamentoDoCiclo() {

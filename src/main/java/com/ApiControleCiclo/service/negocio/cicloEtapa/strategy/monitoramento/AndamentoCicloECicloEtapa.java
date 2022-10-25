@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public interface AndamentoCicloECicloEtapa{
 	
 
-	public abstract void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento);
+	public abstract void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento, Date dataHoraInicio,Date dataHoraFinal);
 	
 
 }

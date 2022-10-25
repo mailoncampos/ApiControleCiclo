@@ -1,7 +1,5 @@
 package com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.context.ApplicationContext;
@@ -19,11 +17,9 @@ public class AndamentoPendente extends AndamentoCicloECicloEtapaImpl implements 
 	}
 
 	@Override
-	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento) {
+	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento, Date dataHoraInicio,Date dataHoraFinal) {
 		
-		if(this.dataFinalCiclo.equals(LocalDateTime.ofInstant(dataHoraDoAndamento.toInstant(), ZoneId.of("America/Cuiaba")))) {
-			return;
-		}
+		
 		
 		Ciclo cicloComNovoStatus = this.cicloAtual;
 		CicloEtapa cicloEtapaComNovoStatus = this.cicloEtapaAtual;

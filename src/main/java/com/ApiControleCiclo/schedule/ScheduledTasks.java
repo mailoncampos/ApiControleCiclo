@@ -22,8 +22,9 @@ public class ScheduledTasks{
 	@Autowired
 	ApplicationContext applicationContext;
 
-//	private final String CRON = "0 0 0 * * *"; // meia noite de todo dia;
-	private final String CRON = "*/20 * * * * *" ;
+//	private final String CRON_UM = "0 0 0 * * *"; // meia noite de todo dia;
+	private final String CRON =  "*/40 * * * * *"; // meia noite de todo dia;
+//	private final String CRON = "* */1 * * * *" ;
 	private final String TIME_ZONE = "America/Cuiaba";
 	private Date dataHoraExecutaAndamento = null;
 	private boolean taskAtiva = false;
@@ -39,11 +40,25 @@ public class ScheduledTasks{
 		if(taskAtiva == false){
 			andamentoCicloECicloEtapaImpl = new AndamentoCicloECicloEtapaImpl(applicationContext);
 			dataHoraExecutaAndamento = andamentoCicloECicloEtapaImpl.monitoraAndamentoDoCiclo();
+			 
 			if(dataHoraExecutaAndamento != null) {
 				executaAndamentoDoCiclo(dataHoraExecutaAndamento);
 			}
 		}
 	}
+	
+	/*@Scheduled(cron = CRON_UM, zone = TIME_ZONE)
+	public void scheduleMonitoraFutireTask() {
+		
+		/*
+		 * criar método que adiciona um ciclo pendente
+		 *
+		andamentoCicloECicloEtapaImpl = new AndamentoCicloECicloEtapaImpl(applicationContext);
+
+		
+		CicloEtapa cicloEtapaPendente = andamentoCicloECicloEtapaImpl.buscaCicloEtapaPendente();
+		
+	}*/
 	
 	private void executaAndamentoDoCiclo(Date dataHoraExecutaAndamento) {
 		if(this.taskAtiva == true) {

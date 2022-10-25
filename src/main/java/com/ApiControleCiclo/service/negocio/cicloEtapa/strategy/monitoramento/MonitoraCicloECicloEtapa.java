@@ -206,13 +206,78 @@ public abstract class MonitoraCicloECicloEtapa {
 		this.dataInicioCiclo = LocalDateTime.ofInstant(this.cicloAtual.getDataHoraInicio().toInstant(), ZoneId.of("America/Cuiaba"));
 		this.dataFinalCiclo = LocalDateTime.ofInstant(this.cicloAtual.getDataHoraFim().toInstant(), ZoneId.of("America/Cuiaba"));
 		
-		if(dataAtualInicio.isBefore(this.dataInicioCiclo) && dataAtualFinal.isAfter(this.dataInicioCiclo)) {
-			 return Date.from(this.dataInicioCiclo.toInstant(ZoneOffset.ofHours(-4)));
+		if(dataAtualInicio.isBefore(this.dataInicioCiclo) && dataAtualFinal.isAfter(this.dataInicioCiclo) && this.dataFinalCiclo.isAfter(LocalDateTime.now())) {
+			 return this.cicloAtual.getDataHoraInicio();
 		}else if(dataAtualInicio.isBefore(this.dataFinalCiclo) && dataAtualFinal.isAfter(this.dataFinalCiclo)) {
-			return Date.from(this.dataFinalCiclo.toInstant(ZoneOffset.ofHours(-4)));
+			return this.cicloAtual.getDataHoraFim();
+		}
+		
+		fechaCiclosAbertosIndevidamente();
+		
+		return null;
+	}
+	
+	private void fechaCiclosAbertosIndevidamente() {
+		for(CicloEtapa auxCicloEtapa : this.cicloEtapasDiferenteDeInativo) {
+			if(auxCicloEtapa.getDataHoraFim().before(Date.from(Instant.now()))) {
+				if(auxCicloEtapa.getStatusCicloEtapa().equals(StatusCicloEnum.ABERTO) 
+						|| auxCicloEtapa.getStatusCicloEtapa().equals(StatusCicloEnum.PENDENTE)) {
+					
+					CicloEtapa cicloEtapaComNovoStatus = auxCicloEtapa;
+					
+					cicloEtapaComNovoStatus.setStatusCicloEtapa(StatusCicloEnum.FECHADO);
+					
+					try {
+						this.cicloEtapaService.salvarCicloEtapa(cicloEtapaComNovoStatus);
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+					
+				}
+			}
+		}
+		for(Ciclo auxCiclo : this.ciclosDiferenteDeInativo) {
+			if(auxCiclo.getDataHoraFim().before(Date.from(Instant.now()))) {
+				if(auxCiclo.getStatusCiclo().equals(StatusCicloEnum.ABERTO) 
+						|| auxCiclo.getStatusCiclo().equals(StatusCicloEnum.PENDENTE)) {
+					Ciclo cicloComNovoStatus = auxCiclo;
+					
+					cicloComNovoStatus.setStatusCiclo(StatusCicloEnum.FECHADO);
+					
+					try {
+						this.cicloService.salvarCiclo(cicloComNovoStatus);
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+				}
+			}
+		}
+	}
+	
+	public CicloEtapa buscaCicloEtapaPendente() {
+		CicloEtapa cicloEtapaPendente = new CicloEtapa();
+		for(CicloEtapa auxCicloEtapa : this.cicloEtapasDiferenteDeInativo) {
+			if(cicloEtapaPendente.getIdenCicloEtapa() == null
+					|| (auxCicloEtapa.getStatusCicloEtapa().equals(StatusCicloEnum.PENDENTE) 
+					&& auxCicloEtapa.getDataHoraInicio().after(Date.from(Instant.now())) 
+					&& auxCicloEtapa.getCiclo().getIdenCiclo().equals(cicloAtual.getIdenCiclo())
+					&& auxCicloEtapa.getDataHoraInicio().after(cicloEtapaPendente.getDataHoraInicio()))){
+				
+				cicloEtapaPendente = auxCicloEtapa;
+			}
+		}
+		if(cicloEtapaPendente.getIdenCicloEtapa() != null){
+			return cicloEtapaPendente;
 		}
 		
 		return null;
 	}
 
+	public LocalDateTime getDataInicioCiclo() {
+		return dataInicioCiclo;
+	}
+
+	public LocalDateTime getDataFinalCiclo() {
+		return dataFinalCiclo;
+	}	
 }

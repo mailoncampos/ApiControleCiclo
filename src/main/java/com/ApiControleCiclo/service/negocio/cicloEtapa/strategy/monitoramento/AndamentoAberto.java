@@ -1,7 +1,5 @@
 package com.ApiControleCiclo.service.negocio.cicloEtapa.strategy.monitoramento;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.context.ApplicationContext;
@@ -16,13 +14,12 @@ public class AndamentoAberto extends AndamentoCicloECicloEtapaImpl implements An
 
 	public AndamentoAberto(ApplicationContext applicationContext) {
 		super(applicationContext);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento) {
+	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento, Date dataHoraInicio,Date dataHoraFinal) {
 		
-		if(this.dataInicioCiclo.equals(LocalDateTime.ofInstant(dataHoraDoAndamento.toInstant(), ZoneId.of("America/Cuiaba")))) {
+		if(dataHoraInicio.equals(dataHoraDoAndamento)) {
 			return;
 		}
 		

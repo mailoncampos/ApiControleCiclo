@@ -20,7 +20,7 @@ public class AndamentoFechado extends AndamentoCicloECicloEtapaImpl implements A
 	}
 	
 	@Override
-	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento) {
+	public void efetuaAndamentoDoCicloECicloEtapa(Date dataHoraDoAndamento, Date dataHoraInicio,Date dataHoraFinal) {
 		
 		
 		Ciclo cicloComNovoStatus = this.cicloAtual;
@@ -55,7 +55,7 @@ public class AndamentoFechado extends AndamentoCicloECicloEtapaImpl implements A
 		List<CicloEtapa> cicloEtapasFuturos = new ArrayList<CicloEtapa>();
 		cicloEtapasFuturos.clear();
 		for(CicloEtapa auxCicloEtapa : cicloEtapas) {
-			if(auxCicloEtapa.getDataHoraInicio().after(Date.from(Instant.now()))) {
+			if(auxCicloEtapa.getDataHoraInicio().after(this.cicloAtual.getDataHoraFim())) {
 				cicloEtapasFuturos.add(auxCicloEtapa);
 			}
 		}
